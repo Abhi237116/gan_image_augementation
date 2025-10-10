@@ -1,3 +1,4 @@
+import torch
 import gan
 import utils
 import argparse
@@ -34,6 +35,7 @@ def train_gans(
                 lr_gen=0.00015,
                 label_smooth=True,
                 alpha=alpha,
+                device="cuda" if torch.cuda.is_available() else "cpu",
             )
         )
 
@@ -93,15 +95,14 @@ def repeatTrain(dataloaders, trial, epoch_len, alpha, end, start=0):
 
 
 def main(train_size, model_size, trial):
-    num_gans = 10
     dataloaders, labeledDataLoader = utils.loadDataset(
         train_size=train_size,
-        batch_size=25,
+        batch_size=1024,
         image_path="./mnist/train-images-idx3-ubyte",
         label_path="./mnist/train-labels-idx1-ubyte",
     )
 
-    repeatTrain(dataloaders, trial=trial, epoch_len=500, end=2000, alpha=model_size)
+    repeatTrain(dataloaders, trial=trial, epoch_len=100, end=400, alpha=model_size)
     """
     lst_saved_models = [None for _ in range(num_gans)]
     
@@ -119,10 +120,10 @@ def main(train_size, model_size, trial):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train GANs on MNIST dataset")
     parser.add_argument(
-        "--train_size", type=int, default=6000, help="Size of training dataset"
+        "--train_size", type=int, default=10240, help="Size of training dataset"
     )
     parser.add_argument(
-        "--model_size", type=float, default=0.2, help="Alpha value for model size"
+        "--model_size", type=float, default=4, help="Alpha value for model size"
     )
     parser.add_argument("--trial", type=int, default=1, help="Trial number")
 

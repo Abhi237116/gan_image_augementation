@@ -18,8 +18,11 @@ class GAN(torch.nn.Module):
         lr_gen=0.0002,
         label_smooth=False,
         alpha=4,
+        device="cpu",
     ):
         super(GAN, self).__init__()
+
+        self.device = device
 
         self.trial = trial
         self.id = id
@@ -29,13 +32,15 @@ class GAN(torch.nn.Module):
         self.gen_input_dim = gen_input_dim
         self.label_smooth = label_smooth
 
-        self.discriminator = modules.Discriminator(disc_input_dim, alpha=alpha)
-        self.generator = modules.Generator(gen_input_dim, alpha=alpha)
+        self.discriminator = modules.Discriminator(disc_input_dim, alpha=alpha).to(
+            self.device
+        )
+        self.generator = modules.Generator(gen_input_dim, alpha=alpha).to(self.device)
 
         self.d_optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=lr_disc)
         self.g_optimizer = torch.optim.Adam(self.generator.parameters(), lr=lr_gen)
         self.loss_function = nn.BCELoss()
-        self.constNoise = torch.randn(25, self.gen_input_dim)
+        self.constNoise = torch.randn(25, self.gen_input_dim, device=self.device)
 
         self.lst_epochs = []
         self.lst_disc_loss = []
@@ -49,7 +54,7 @@ class GAN(torch.nn.Module):
         self.d_optimizer.zero_grad()
 
         prediction_r = self.discriminator(real_data)
-        target = torch.ones(real_data.size(0), 1)
+        target = torch.ones(real_data.size(0), 1, device=self.device)
         if self.label_smooth:
             target = 0.9 * target
         error_r = self.loss_function(prediction_r, target)  # real
@@ -57,7 +62,7 @@ class GAN(torch.nn.Module):
 
         prediction_f = self.discriminator(fake_data)
         error_f = self.loss_function(
-            prediction_f, torch.zeros(fake_data.size(0), 1)
+            prediction_f, torch.zeros(fake_data.size(0), 1, device=self.device)
         )  # fake
         error_f.backward()
 
@@ -76,7 +81,7 @@ class GAN(torch.nn.Module):
 
         synth_data = self.generator(noise_data)
         prediction_f = self.discriminator(synth_data)
-        error_f = self.loss_function(prediction_f, torch.ones(synth_data.size(0), 1))
+        error_f = self.loss_function(prediction_f, torch.ones(synth_data.size(0), 1, device=self.device))
         error_f.backward()
 
         self.g_optimizer.step()
@@ -105,8 +110,11 @@ class GAN(torch.nn.Module):
             for n_batch, real_data in enumerate(
                 data_loader
             ):  # real_data is of shape (batch_size, 784)
+                real_data = real_data.to(self.device)
                 for _ in range(self.discriminator_steps):
-                    noise = torch.randn(real_data.shape[0], self.gen_input_dim)
+                    noise = torch.randn(
+                        real_data.shape[0], self.gen_input_dim, device=self.device
+                    )
                     fake_data = self.generator(noise).detach()
 
                     disc_loss += (
@@ -114,7 +122,9 @@ class GAN(torch.nn.Module):
                         / self.discriminator_steps
                     )
                 for _ in range(self.generator_steps):
-                    gen_noise = torch.randn(real_data.shape[0], self.gen_input_dim)
+                    gen_noise = torch.randn(
+                        real_data.shape[0], self.gen_input_dim, device=self.device
+                    )
                     gen_loss += (
                         self.train_generator(gen_noise).item() / self.generator_steps
                     )

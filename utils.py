@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 from mlxtend.data import loadlocal_mnist
 from PIL import Image
+import numpy as np
 import torch
 import random
 import torch.utils.data
@@ -31,7 +32,7 @@ def vector_to_img(vect, filename, display=False):
     Input: tensor of len 784 of floats from -1.0 to 1.0
     """
     make_folder(filename)
-    vect = vect.detach().numpy()
+    vect = vect.cpu().detach().numpy()
     vect = vect.reshape(-1, 28)
     img = Image.fromarray((vect + 1) * 128)
     img = img.convert("L")
@@ -117,7 +118,7 @@ def load_model(gan, trial, ID, num_epoch):
 
 def loadDataset(
     train_size=1000,
-    batch_size=100,
+    batch_size=128,
     randSeed=17,
     image_path="./mnist/train-images-idx3-ubyte",
     label_path="./mnist/train-labels-idx1-ubyte",
@@ -140,7 +141,7 @@ def loadDataset(
     allData = torch.zeros((0, 785))
     dataLoaders = []
     for i in range(10):
-        data = (torch.tensor(sortedImages[i][:train_size]) - 128.0) / 128
+        data = (torch.tensor(np.array(sortedImages[i][:train_size])) - 128.0) / 128
         labeled = torch.cat((data, i * torch.ones((data.shape[0], 1))), 1)
         allData = torch.cat((allData, labeled), 0)
         dataLoaders.append(
