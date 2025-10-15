@@ -56,16 +56,6 @@ To run our project, follow these steps:
 3. **Build**: Build the project by running the `setup.py` script, which will compile and install the necessary components.
 4. **Deploy**: Deploy the project by running the `main.py` script, which will launch the GAN training process and provide example usage and demonstration code.
 
-🧪 Testing Instructions
-----------------------
-
-To test our project, follow these steps:
-
-1. **Unit Tests**: Run the unit tests by executing the `test_gan.py` script, which will verify the correctness of the GAN implementation.
-2. **Integration Tests**: Run the integration tests by executing the `test_train_gans.py` script, which will verify the correctness of the GAN training process.
-3. **Example Usage**: Run the example usage code by executing the `main.py` script, which will demonstrate the usage of the GAN implementation and provide example outputs.
-
-
 
 📦 API Reference
 ----------------
@@ -75,7 +65,7 @@ Our project provides a comprehensive API reference, including documentation for 
 👤 Author
 ---------
 
-Our project was developed by [Your Name], a researcher and developer with a strong background in artificial intelligence, machine learning, and deep learning. Contributions and collaborations are welcome, and we invite you to join us on this journey and contribute to the development of this project.
+Project was developed by K Abhiram and Lalithadithya ,developers with a background in artificial intelligence, machine learning, and deep learning.
 
 📝 License
 ---------
